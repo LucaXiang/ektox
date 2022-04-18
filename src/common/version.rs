@@ -97,4 +97,9 @@ mod tests {
         let new_version = Version::new("2.0.1");
         assert!(new_version > old_version);
     }
+
+    #[test]
+    fn should_no_pass() {
+        assert!(1 + 1 == 3);
+    }
 }
