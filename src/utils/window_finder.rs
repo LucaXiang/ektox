@@ -6,7 +6,7 @@ use windows::Win32::{
     },
     UI::WindowsAndMessaging::{
         EnumWindows, GetWindowLongW, GetWindowTextLengthW, GetWindowTextW,
-        GetWindowThreadProcessId, GWL_STYLE,
+        GetWindowThreadProcessId, GWL_STYLE, WS_POPUP, WS_VISIBLE,
     },
 };
 
@@ -92,5 +92,28 @@ impl WindowFinder {
             }
         }
         String::from_utf16_lossy(&buffer)
+    }
+
+    pub fn get_frontent_window() -> Vec<HWND> {
+        let mut param = EnumWindowParam::new(|_ewp, hwnd| {
+            let mut result = false;
+            loop {
+                if WindowFinder::get_window_title(hwnd).len() == 0 {
+                    break;
+                }
+                let window_style = WindowFinder::get_window_style(hwnd);
+                if window_style & WS_POPUP.0 != 0 {
+                    break;
+                }
+                if window_style & WS_VISIBLE.0 == 0 {
+                    break;
+                }
+                result = true;
+                break;
+            }
+            result
+        });
+        WindowFinder::enum_window(&mut param);
+        param.window_handles
     }
 }
