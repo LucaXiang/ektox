@@ -50,4 +50,12 @@ impl WindowFinder {
             EnumWindows(Some(enum_window_proc), LPARAM(pointer));
         }
     }
+
+    pub fn get_window_title(hwnd: HWND) -> String {
+        let mut buffer: [u16; 256] = [0; 256];
+        unsafe {
+            GetWindowTextW(hwnd, &mut buffer);
+        }
+        String::from_utf16_lossy(&buffer)
+    }
 }
