@@ -59,7 +59,8 @@ impl WindowFinder {
         String::from_utf16_lossy(&buffer)
     }
 
-    pub fn get_window_style(hwnd: HWND) -> i32 {
-        unsafe { GetWindowLongW(hwnd, GWL_STYLE) }
+    pub fn get_window_style(hwnd: HWND) -> u32 {
+        unsafe { GetWindowLongW(hwnd, GWL_STYLE) as u32 }
     }
+
 }
