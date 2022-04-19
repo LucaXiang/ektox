@@ -5,8 +5,8 @@ use windows::Win32::{
         Threading::{OpenProcess, PROCESS_QUERY_LIMITED_INFORMATION},
     },
     UI::WindowsAndMessaging::{
-        EnumWindows, GetWindowLongW, GetWindowTextW, GetWindowThreadProcessId, GWL_STYLE, WS_POPUP,
-        WS_VISIBLE,
+        EnumWindows, GetWindowLongW, GetWindowTextLengthW, GetWindowTextW,
+        GetWindowThreadProcessId, GWL_STYLE, WS_POPUP, WS_VISIBLE,
     },
 };
 
@@ -98,8 +98,10 @@ impl WindowFinder {
         let mut param = EnumWindowParam::new(|_ewp, hwnd| {
             let mut result = false;
             loop {
-                if WindowFinder::get_window_title(hwnd).len() == 0 {
-                    break;
+                unsafe {
+                    if GetWindowTextLengthW(hwnd) == 0 {
+                        break;
+                    }
                 }
                 let window_style = WindowFinder::get_window_style(hwnd);
                 if window_style & WS_POPUP.0 != 0 {
