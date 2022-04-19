@@ -30,7 +30,7 @@ impl EnumWindowParam {
     }
 
     pub fn filter(&mut self, hwnd: HWND) -> bool {
-        let result = (self.predicate)(&self, hwnd);
+        let result = (self.predicate)(self, hwnd);
         if result {
             self.window_handles.push(hwnd);
         }
