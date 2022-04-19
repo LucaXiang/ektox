@@ -63,7 +63,9 @@ impl PartialEq for Version {
 
 impl PartialOrd for Version {
     fn partial_cmp(&self, other: &Version) -> Option<std::cmp::Ordering> {
-        Some(self.cmp(other))
+        let s = self.major * 100 + self.minor * 10 + self.patch;
+        let o = other.major * 100 + other.minor * 10 + other.patch;
+        Some(s.cmp(&o))
     }
 }
 
