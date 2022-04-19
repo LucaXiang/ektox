@@ -5,8 +5,8 @@ use windows::Win32::{
         Threading::{OpenProcess, PROCESS_QUERY_LIMITED_INFORMATION},
     },
     UI::WindowsAndMessaging::{
-        EnumWindows, GetWindowLongW, GetWindowTextLengthW, GetWindowTextW,
-        GetWindowThreadProcessId, GWL_STYLE, WS_POPUP, WS_VISIBLE,
+        EnumWindows, GetWindowLongW, GetWindowTextW, GetWindowThreadProcessId, GWL_STYLE, WS_POPUP,
+        WS_VISIBLE,
     },
 };
 
@@ -61,8 +61,7 @@ impl WindowFinder {
     pub fn get_window_title(hwnd: HWND) -> String {
         static mut BUFFER: [u16; 256] = [0; 256];
         unsafe {
-            let len = GetWindowTextLengthW(hwnd) as usize;
-            GetWindowTextW(hwnd, &mut BUFFER);
+            let len = GetWindowTextW(hwnd, &mut BUFFER) as usize;
             String::from_utf16_lossy(&BUFFER[0..len])
         }
     }
@@ -81,17 +80,18 @@ impl WindowFinder {
 
     pub fn get_process_name_from_pid(pid: u32) -> String {
         const MAX_FILENAME: usize = MAX_PATH as usize;
-        let mut buffer: [u16; MAX_FILENAME] = [0; MAX_FILENAME];
+        static mut BUFFER: [u16; MAX_FILENAME] = [0; MAX_FILENAME];
         unsafe {
+            let mut len = 0;
             match OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, BOOL::from(false), pid) {
                 Ok(handle) => {
-                    K32GetModuleFileNameExW(handle, HINSTANCE(0), &mut buffer);
+                    len = K32GetModuleFileNameExW(handle, HINSTANCE(0), &mut BUFFER) as usize;
                     CloseHandle(handle);
                 }
                 Err(_) => {}
             }
+            String::from_utf16_lossy(&BUFFER[0..len])
         }
-        String::from_utf16_lossy(&buffer)
     }
 
     pub fn get_frontent_window() -> Vec<HWND> {
