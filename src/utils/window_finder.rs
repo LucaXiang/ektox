@@ -83,12 +83,11 @@ impl WindowFinder {
         static mut BUFFER: [u16; MAX_FILENAME] = [0; MAX_FILENAME];
         unsafe {
             let mut len = 0;
-            match OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, BOOL::from(false), pid) {
-                Ok(handle) => {
-                    len = K32GetModuleFileNameExW(handle, HINSTANCE(0), &mut BUFFER) as usize;
-                    CloseHandle(handle);
-                }
-                Err(_) => {}
+            if let Ok(handle) =
+                OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, BOOL::from(false), pid)
+            {
+                len = K32GetModuleFileNameExW(handle, HINSTANCE(0), &mut BUFFER) as usize;
+                CloseHandle(handle);
             }
             String::from_utf16_lossy(&BUFFER[0..len])
         }
@@ -97,6 +96,7 @@ impl WindowFinder {
     pub fn get_frontent_window() -> Vec<HWND> {
         let mut param = EnumWindowParam::new(|_ewp, hwnd| {
             let mut result = false;
+            #[allow(clippy::never_loop)]
             loop {
                 unsafe {
                     if GetWindowTextLengthW(hwnd) == 0 {
