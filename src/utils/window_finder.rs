@@ -1,5 +1,9 @@
 use windows::Win32::{
-    Foundation::{BOOL, HWND, LPARAM},
+    Foundation::{CloseHandle, BOOL, HANDLE, HINSTANCE, HWND, LPARAM, MAX_PATH},
+    System::{
+        ProcessStatus::K32GetModuleFileNameExW,
+        Threading::{OpenProcess, PROCESS_QUERY_LIMITED_INFORMATION},
+    },
     UI::WindowsAndMessaging::{
         EnumWindows, GetWindowLongW, GetWindowTextW, GetWindowThreadProcessId, GWL_STYLE,
     },
@@ -71,5 +75,20 @@ impl WindowFinder {
             GetWindowThreadProcessId(hwnd, &mut pid);
         }
         pid
+    }
+
+    pub fn get_process_name_from_pid(pid: u32) -> String {
+        const MAX_FILENAME: usize = (MAX_PATH as usize);
+        let mut buffer: [u16; MAX_FILENAME] = [0; MAX_FILENAME];
+        unsafe {
+            match OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, BOOL::from(false), pid) {
+                Ok(handle) => {
+                    K32GetModuleFileNameExW(handle, HINSTANCE(0), &mut buffer);
+                    CloseHandle(handle);
+                }
+                Err(_) => {}
+            }
+        }
+        String::from_utf16_lossy(&buffer)
     }
 }
