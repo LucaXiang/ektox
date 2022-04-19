@@ -1,6 +1,8 @@
 use windows::Win32::{
     Foundation::{BOOL, HWND, LPARAM},
-    UI::WindowsAndMessaging::{EnumWindows, GetWindowLongW, GetWindowTextW, GWL_STYLE},
+    UI::WindowsAndMessaging::{
+        EnumWindows, GetWindowLongW, GetWindowTextW, GetWindowThreadProcessId, GWL_STYLE,
+    },
 };
 
 pub type EnumWindowPredicate = fn(&EnumWindowParam, HWND) -> bool;
@@ -63,4 +65,11 @@ impl WindowFinder {
         unsafe { GetWindowLongW(hwnd, GWL_STYLE) as u32 }
     }
 
+    pub fn get_process_id_from_hwnd(hwnd: HWND) -> u32 {
+        let mut pid: u32 = 0;
+        unsafe {
+            GetWindowThreadProcessId(hwnd, &mut pid);
+        }
+        pid
+    }
 }
