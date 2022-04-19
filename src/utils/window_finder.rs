@@ -5,7 +5,8 @@ use windows::Win32::{
         Threading::{OpenProcess, PROCESS_QUERY_LIMITED_INFORMATION},
     },
     UI::WindowsAndMessaging::{
-        EnumWindows, GetWindowLongW, GetWindowTextW, GetWindowThreadProcessId, GWL_STYLE,
+        EnumWindows, GetWindowLongW, GetWindowTextLengthW, GetWindowTextW,
+        GetWindowThreadProcessId, GWL_STYLE,
     },
 };
 
@@ -58,11 +59,12 @@ impl WindowFinder {
     }
 
     pub fn get_window_title(hwnd: HWND) -> String {
-        let mut buffer: [u16; 256] = [0; 256];
+        static mut BUFFER: [u16; 256] = [0; 256];
         unsafe {
-            GetWindowTextW(hwnd, &mut buffer);
+            let len = GetWindowTextLengthW(hwnd) as usize;
+            GetWindowTextW(hwnd, &mut BUFFER);
+            String::from_utf16_lossy(&BUFFER[0..len])
         }
-        String::from_utf16_lossy(&buffer)
     }
 
     pub fn get_window_style(hwnd: HWND) -> u32 {
