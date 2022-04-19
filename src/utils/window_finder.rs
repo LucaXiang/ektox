@@ -1,6 +1,6 @@
 use windows::Win32::{
     Foundation::{BOOL, HWND, LPARAM},
-    UI::WindowsAndMessaging::EnumWindows,
+    UI::WindowsAndMessaging::{EnumWindows, GetWindowLongW, GetWindowTextW, GWL_STYLE},
 };
 
 pub type EnumWindowPredicate = fn(&EnumWindowParam, HWND) -> bool;
@@ -57,5 +57,9 @@ impl WindowFinder {
             GetWindowTextW(hwnd, &mut buffer);
         }
         String::from_utf16_lossy(&buffer)
+    }
+
+    pub fn get_window_style(hwnd: HWND) -> i32 {
+        unsafe { GetWindowLongW(hwnd, GWL_STYLE) }
     }
 }
