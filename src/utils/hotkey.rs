@@ -1,3 +1,5 @@
+use std::string::ParseError;
+
 #[derive(Eq)]
 struct Hotkey {
     ctrl: bool,
@@ -27,6 +29,11 @@ impl Hotkey {
     }
     pub fn default() -> Self {
         Hotkey::new(false, false, false, false, 0)
+    }
+
+    pub fn parse(s: &String) -> Result<Self, ParseError>{
+        let mut copy = s.clone();
+        Ok(Hotkey::default())
     }
 }
 
