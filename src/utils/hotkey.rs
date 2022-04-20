@@ -1,3 +1,5 @@
+use std::fmt::Error;
+use std::str::ParseBoolError;
 use std::string::ParseError;
 
 use windows::Win32::UI::Input::KeyboardAndMouse::{
@@ -8,13 +10,13 @@ use self::key::Key;
 pub mod key;
 use self::special_key::SpecialKey;
 pub mod special_key;
-#[derive(Eq)]
+#[derive(Eq, Debug)]
 struct Hotkey {
     ctrl: bool,
     shift: bool,
     alt: bool,
     win: bool,
-    key: Key,
+    key: Option<Key>,
 }
 impl PartialEq for Hotkey {
     fn eq(&self, other: &Self) -> bool {
@@ -26,7 +28,7 @@ impl PartialEq for Hotkey {
     }
 }
 impl Hotkey {
-    pub fn new(ctrl: bool, shift: bool, alt: bool, win: bool, key: Key) -> Self {
+    pub fn new(ctrl: bool, shift: bool, alt: bool, win: bool, key: Option<Key>) -> Self {
         Hotkey {
             ctrl,
             shift,
@@ -36,12 +38,70 @@ impl Hotkey {
         }
     }
     pub fn default() -> Self {
-        Hotkey::new(false, false, false, false, Key::alpha_numeric('0'))
+        Hotkey {
+            ctrl: false,
+            shift: false,
+            alt: false,
+            win: false,
+            key: None,
+        }
     }
 
-    pub fn parse(s: &String) -> Result<Self, ParseError> {
-        let mut copy = s.clone();
-        Ok(Hotkey::default())
+    pub fn parse(keys: &str) -> Result<Self, Error> {
+        let mut hotkey = Hotkey::default();
+        let mut err = false;
+        let mut part_of_keys: Vec<&str> = keys.split('+').map(|part| part.trim()).collect();
+        // remove duplicate key
+        // case ctrl + shift + ctrl + a
+        part_of_keys.dedup();
+        for key in part_of_keys {
+            let str = key.to_uppercase();
+            let str = str.as_str();
+            if match str {
+                "CTRL" => {
+                    hotkey.ctrl = true;
+                    true
+                }
+                "ALT" => {
+                    hotkey.alt = true;
+                    true
+                }
+                "SHIFT" => {
+                    hotkey.shift = true;
+                    true
+                }
+                "WIN" => {
+                    hotkey.win = true;
+                    true
+                }
+                _ => false,
+            } {
+                continue;
+            }
+            // at here key must be None
+            // ctrl + f1 + f2  (Special + Special)
+            // ctrl + a + b    (AlphaNumeric + AlphaNumeric)
+            // ctrl + f1 + a   (Special + AlphaNumeric)
+            if hotkey.key == None {
+                if let Some(special_key) = SpecialKey::from_str(str) {
+                    hotkey.key = Some(Key::Special(special_key));
+                    continue;
+                }
+                // at here key must be alpha numeric
+                if str.len() == 1 && str.is_ascii() {
+                    hotkey.key = Some(Key::AlphaNumeric(str.chars().nth(0).unwrap()));
+                    continue;
+                }
+            }
+            // parse error
+            err = true;
+            break;
+        }
+        if !err {
+            Ok(hotkey)
+        } else {
+            Err(Error::default())
+        }
     }
 
     pub fn get_modifiers(&self) -> HOT_KEY_MODIFIERS {
@@ -65,12 +125,37 @@ impl Hotkey {
 
 #[cfg(test)]
 mod tests {
+    use std::fmt::Error;
+
     use super::{Hotkey, Key};
 
     #[test]
     fn it_works() {
-        let new = Hotkey::new(false, false, false, false, Key::AlphaNumeric('0'));
+        let new = Hotkey::new(false, false, false, false, None);
         let default = Hotkey::default();
         assert!(new == default);
+    }
+
+    #[test]
+    fn parse_1() {
+        let new = Hotkey::new(true, false, false, false, Some(Key::AlphaNumeric('a')));
+        let parse = Hotkey::parse("ctrl + a").unwrap();
+        println!("{:?}", new);
+        println!("{:?}", parse);
+        assert!(new == parse);
+    }
+    #[test]
+    fn parse_2() {
+        let new = Hotkey::new(true, false, false, false, Some(Key::AlphaNumeric('a')));
+        let parse = Hotkey::parse("ctrl + ctrl + a").unwrap();
+        println!("{:?}", new);
+        println!("{:?}", parse);
+        assert!(new == parse);
+    }
+
+    #[test]
+    fn parse_3() {
+        let parse = Hotkey::parse("ctrl + ctrl + f1 + f2");
+        assert_eq!(parse, Err(Error::default()));
     }
 }
