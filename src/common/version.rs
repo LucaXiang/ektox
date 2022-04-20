@@ -63,9 +63,26 @@ impl PartialEq for Version {
 
 impl PartialOrd for Version {
     fn partial_cmp(&self, other: &Version) -> Option<std::cmp::Ordering> {
-        let s = self.major * 100 + self.minor * 10 + self.patch;
-        let o = other.major * 100 + other.minor * 10 + other.patch;
-        Some(s.cmp(&o))
+        let mut result = std::cmp::Ordering::Equal;
+        loop{
+            if self.major != other.major
+            {
+                result = self.major.cmp(&other.major);
+                break;
+            }
+            if self.minor != other.minor
+            {
+                result = self.minor.cmp(&other.minor);
+                break;
+            }
+            if self.patch != other.patch
+            {
+                result = self.patch.cmp(&other.patch);
+                break;
+            }
+            break;
+        }
+        Some(result)
     }
 }
 
@@ -98,5 +115,9 @@ mod tests {
         let old_version = Version::new("1.0.5");
         let new_version = Version::new("2.0.1");
         assert!(new_version > old_version);
+
+        let old_version = Version::new("1.1.1");
+        let new_version = Version::new("1.1.1");
+        assert!(new_version == old_version);
     }
 }
