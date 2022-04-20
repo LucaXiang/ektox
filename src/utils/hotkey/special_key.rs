@@ -1,5 +1,5 @@
 use windows::Win32::UI::Input::KeyboardAndMouse::*;
-#[derive(Eq, Clone, Copy)]
+#[derive(Eq, Clone, Copy, Debug)]
 #[allow(unused)]
 pub enum SpecialKey {
     BackSpace = VK_BACK.0 as isize,
