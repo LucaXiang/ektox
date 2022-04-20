@@ -65,7 +65,7 @@ impl Hotkey {
 
 #[cfg(test)]
 mod tests {
-    use super::{Hotkey, Key, SpecialKey};
+    use super::{Hotkey, Key};
 
     #[test]
     fn it_works() {
