@@ -1,5 +1,5 @@
 use super::SpecialKey;
-#[derive(Eq)]
+#[derive(Eq, Debug)]
 pub enum Key {
     AlphaNumeric(char),
     Special(SpecialKey),
@@ -7,7 +7,9 @@ pub enum Key {
 impl PartialEq for Key {
     fn eq(&self, other: &Self) -> bool {
         match (self, other) {
-            (Self::AlphaNumeric(l), Self::AlphaNumeric(r)) => l.eq(r),
+            (Self::AlphaNumeric(l), Self::AlphaNumeric(r)) => {
+                l.to_ascii_uppercase().eq(&r.to_ascii_uppercase())
+            }
             (Self::Special(l), Self::Special(r)) => l.eq(r),
             _ => false,
         }
