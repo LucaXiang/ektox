@@ -1,5 +1,7 @@
 use std::string::ParseError;
 
+use windows::Win32::UI::Input::KeyboardAndMouse::{MOD_ALT, MOD_CONTROL, MOD_SHIFT, MOD_WIN, HOT_KEY_MODIFIERS};
+
 #[derive(Eq)]
 struct Hotkey {
     ctrl: bool,
@@ -36,20 +38,20 @@ impl Hotkey {
         Ok(Hotkey::default())
     }
 
-    pub fn get_modifiers(&self) -> usize {
-        // https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-registerhotkey       
-        let mut modifiers: usize = 0;
+    pub fn get_modifiers(&self) -> HOT_KEY_MODIFIERS {
+        // https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-registerhotkey
+        let mut modifiers: HOT_KEY_MODIFIERS = HOT_KEY_MODIFIERS::default();
         if self.alt {
-            modifiers |= 1;
+            modifiers |= MOD_ALT;
         }
         if self.ctrl {
-            modifiers |= 2;
+            modifiers |= MOD_CONTROL;
         }
         if self.shift {
-            modifiers |= 4;
+            modifiers |= MOD_SHIFT;
         }
         if self.win {
-            modifiers |= 8;
+            modifiers |= MOD_WIN;
         }
         modifiers
     }
