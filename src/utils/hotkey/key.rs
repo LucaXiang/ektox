@@ -22,6 +22,13 @@ impl Key {
     pub fn special(special_key: SpecialKey) -> Self {
         Key::Special(special_key)
     }
+
+    pub fn as_u32(&self) -> u32 {
+        match self {
+            Key::AlphaNumeric(c) => *c as u32,
+            Key::Special(k) => k.as_u32(),
+        }
+    }
 }
 
 #[cfg(test)]
@@ -34,5 +41,7 @@ mod tests {
         let c = Key::AlphaNumeric('a');
         assert!(a != b);
         assert!(c == a);
+        assert!(a.as_u32() == 97);
+        assert!(b.as_u32() == 8)
     }
 }

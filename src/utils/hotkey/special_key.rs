@@ -1,5 +1,6 @@
 use windows::Win32::UI::Input::KeyboardAndMouse::*;
-#[derive(Eq)]
+#[derive(Eq, Clone, Copy)]
+#[allow(unused)]
 pub enum SpecialKey {
     BackSpace = VK_BACK.0 as isize,
     Tab = VK_TAB.0 as isize,
@@ -36,6 +37,12 @@ pub enum SpecialKey {
     F12 = VK_F12.0 as isize,
     NumLock = VK_NUMLOCK.0 as isize,
     ScrollLock = VK_SCROLL.0 as isize,
+}
+
+impl SpecialKey {
+    pub fn as_u32(&self) -> u32 {
+        *self as u32
+    }
 }
 
 impl PartialEq for SpecialKey {
