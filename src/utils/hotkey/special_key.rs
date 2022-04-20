@@ -43,10 +43,63 @@ impl SpecialKey {
     pub fn as_u32(&self) -> u32 {
         *self as u32
     }
+
+    pub fn from_str(str: &str) -> Option<Self> {
+        match str.to_uppercase().as_str() {
+            "BACKSPACE" => Some(SpecialKey::BackSpace),
+            "TAB" => Some(SpecialKey::Tab),
+            "CLEAR" => Some(SpecialKey::Clear),
+            "ENTER" => Some(SpecialKey::Enter),
+            "PAUSE" => Some(SpecialKey::Pause),
+            "CAPLOCK" => Some(SpecialKey::Caplock),
+            "ESCAPE" => Some(SpecialKey::Escape),
+            "SPACEBAR" => Some(SpecialKey::SpaceBar),
+            "PAGEUP" => Some(SpecialKey::PageUp),
+            "PAGEDOWN" => Some(SpecialKey::PageDown),
+            "END" => Some(SpecialKey::End),
+            "HOME" => Some(SpecialKey::Home),
+            "LEFTARROW" => Some(SpecialKey::LeftArrow),
+            "UPARROW" => Some(SpecialKey::UpArrow),
+            "RIGHTARROW" => Some(SpecialKey::RightArrow),
+            "DOWNARROW" => Some(SpecialKey::DownArrow),
+            "SELECT" => Some(SpecialKey::Select),
+            "PRINT" => Some(SpecialKey::Print),
+            "PRINTSCREEN" => Some(SpecialKey::PrintScreen),
+            "INSERT" => Some(SpecialKey::Insert),
+            "DELETE" => Some(SpecialKey::Delete),
+            "F1" => Some(SpecialKey::F1),
+            "F2" => Some(SpecialKey::F2),
+            "F3" => Some(SpecialKey::F3),
+            "F4" => Some(SpecialKey::F4),
+            "F5" => Some(SpecialKey::F5),
+            "F6" => Some(SpecialKey::F6),
+            "F7" => Some(SpecialKey::F7),
+            "F8" => Some(SpecialKey::F8),
+            "F9" => Some(SpecialKey::F9),
+            "F10" => Some(SpecialKey::F10),
+            "F11" => Some(SpecialKey::F11),
+            "F12" => Some(SpecialKey::F12),
+            "NUMLOCK" => Some(SpecialKey::NumLock),
+            "SCROLLLOCK" => Some(SpecialKey::ScrollLock),
+            _ => None,
+        }
+    }
 }
 
 impl PartialEq for SpecialKey {
     fn eq(&self, other: &Self) -> bool {
         core::mem::discriminant(self) == core::mem::discriminant(other)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::SpecialKey;
+
+    #[test]
+    fn it_works() {
+        let a = SpecialKey::from_str("F1").unwrap();
+        let b = SpecialKey::F1;
+        assert!(a == b);
     }
 }
