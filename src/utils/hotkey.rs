@@ -31,9 +31,27 @@ impl Hotkey {
         Hotkey::new(false, false, false, false, 0)
     }
 
-    pub fn parse(s: &String) -> Result<Self, ParseError>{
+    pub fn parse(s: &String) -> Result<Self, ParseError> {
         let mut copy = s.clone();
         Ok(Hotkey::default())
+    }
+
+    pub fn get_modifiers(&self) -> usize {
+        // https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-registerhotkey       
+        let mut modifiers: usize = 0;
+        if self.alt {
+            modifiers |= 1;
+        }
+        if self.ctrl {
+            modifiers |= 2;
+        }
+        if self.shift {
+            modifiers |= 4;
+        }
+        if self.win {
+            modifiers |= 8;
+        }
+        modifiers
     }
 }
 
