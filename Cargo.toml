@@ -15,3 +15,11 @@ features = [
     "Win32_System_ProcessStatus",
     "Win32_UI_Input_KeyboardAndMouse"
 ]
+
+[dependencies.serde_json]
+version = "1.0.79"
+
+
+[dependencies.serde]
+version = "1.0.136"
+features = ["derive"]
