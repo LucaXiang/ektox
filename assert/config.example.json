@@ -1,0 +1,13 @@
+{
+  "startup": true,
+  "actions": [
+    {
+      "hotkey": "ctrl + 1",
+      "exec": "C:/ProgramFile/test1.exe"
+    },
+    {
+      "hotkey": "ctrl + 2",
+      "exec": "C:/ProgramFile/test2.exe"
+    }
+  ]
+}
