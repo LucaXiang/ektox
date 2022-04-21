@@ -1,8 +1,66 @@
-use ektox::common::Version;
+use std::{collections::HashMap, fs::File, io::BufReader};
+
+use ektox::{
+    common::{App, Config},
+    utils::{EnumWindowParam, Hotkey, WindowFinder},
+};
+
+use windows::{
+    core::PCSTR,
+    Win32::{
+        Foundation::HWND,
+        UI::{
+            Input::KeyboardAndMouse::RegisterHotKey,
+            WindowsAndMessaging::{
+                DispatchMessageW, GetMessageW, MessageBoxA, SetForegroundWindow, MB_OK, MSG,
+                WM_HOTKEY,
+            },
+        },
+    },
+};
 
 fn main() {
-    let version = Version::from_cargo_package();
-    println!("{}", version);
+    let file = File::open("./config.json").unwrap();
+    let reader = BufReader::new(file);
+    let config: Config = serde_json::from_reader(reader).unwrap();
+    let hotkey = Hotkey::parse(config.actions[0].hotkey.as_str()).unwrap();
+    let windows = WindowFinder::get_frontent_window();
+    let mut maps = HashMap::<String, HWND>::new();
+    for w in windows {
+        let filename =
+            WindowFinder::get_process_name_from_pid(WindowFinder::get_process_id_from_hwnd(w));
+
+        let filename = filename
+            .chars()
+            .map(|c| -> char {
+                if c == '\\' {
+                    '/'
+                } else {
+                    c
+                }
+            })
+            .collect();
+        maps.insert(filename, w);
+    }
+    unsafe {
+        RegisterHotKey(HWND::default(), 1, hotkey.get_modifiers(), hotkey.get_key());
+        let mut msg = MSG::default();
+
+        while GetMessageW(&mut msg, HWND(0), 0, 0).into() {
+            if msg.message == WM_HOTKEY {
+                let exec = &config.actions[0].exec;
+                let w = maps[exec];
+                println!(
+                    "pressed {:} switch to => {}",
+                    config.actions[0].hotkey, exec
+                );
+                SetForegroundWindow(w);
+            }
+            DispatchMessageW(&msg);
+        }
+    }
+    let app = App::new();
+    println!("{}", app.get_version());
 }
 
 /*
