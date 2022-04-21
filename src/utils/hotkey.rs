@@ -1,12 +1,8 @@
+use self::key::Key;
 use std::fmt::Error;
-use std::str::ParseBoolError;
-use std::string::ParseError;
-
 use windows::Win32::UI::Input::KeyboardAndMouse::{
     HOT_KEY_MODIFIERS, MOD_ALT, MOD_CONTROL, MOD_SHIFT, MOD_WIN,
 };
-
-use self::key::Key;
 pub mod key;
 use self::special_key::SpecialKey;
 pub mod special_key;

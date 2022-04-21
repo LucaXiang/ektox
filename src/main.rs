@@ -1,11 +1,4 @@
 use ektox::common::Version;
-use ektox::utils::Hotkey;
-use windows::core::PCSTR;
-use windows::Win32::Foundation::HWND;
-use windows::Win32::UI::Input::KeyboardAndMouse::RegisterHotKey;
-use windows::Win32::UI::WindowsAndMessaging::{
-    DispatchMessageW, GetMessageW, MessageBoxA, MB_ICONEXCLAMATION, MB_OK, MSG, WM_HOTKEY,
-};
 
 fn main() {
     let version = Version::from_cargo_package();
