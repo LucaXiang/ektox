@@ -88,7 +88,7 @@ impl SpecialKey {
 
 impl PartialEq for SpecialKey {
     fn eq(&self, other: &Self) -> bool {
-        core::mem::discriminant(self) == core::mem::discriminant(other)
+        self.as_u32() == other.as_u32()
     }
 }
 
