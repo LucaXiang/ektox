@@ -50,53 +50,84 @@ impl Hotkey {
         // remove duplicate key
         // case ctrl + shift + ctrl + a
         part_of_keys.dedup();
-        for key in part_of_keys {
-            let str = key.to_uppercase();
-            let str = str.as_str();
-            if match str {
-                "CTRL" => {
-                    hotkey.ctrl = true;
-                    true
-                }
-                "ALT" => {
-                    hotkey.alt = true;
-                    true
-                }
-                "SHIFT" => {
-                    hotkey.shift = true;
-                    true
-                }
-                "WIN" => {
-                    hotkey.win = true;
-                    true
-                }
-                _ => false,
-            } {
-                continue;
+        loop {
+            // if part_of_keys is empty or just one
+            // like:
+            // 1: "ctrl"
+            // 2: "a"
+            // 3: ""
+            if part_of_keys.len() < 2 {
+                err = true;
+                break;
             }
-            // at here key must be None
-            // ctrl + f1 + f2  (Special + Special)
-            // ctrl + a + b    (AlphaNumeric + AlphaNumeric)
-            // ctrl + f1 + a   (Special + AlphaNumeric)
-            if hotkey.key == None {
-                if let Some(special_key) = SpecialKey::from_str(str) {
-                    hotkey.key = Some(Key::Special(special_key));
+            for part in part_of_keys.into_iter() {
+                if hotkey.parse_modifier(part) {
                     continue;
                 }
-                // at here key must be alpha numeric
-                if str.len() == 1 && str.is_ascii() {
-                    hotkey.key = Some(Key::AlphaNumeric(str.chars().nth(0).unwrap()));
-                    continue;
+                // here hotkey must be None
+                // 1: "ctrl + 1 + 2"
+                // 2: "ctrl + Delete + BackSpace"
+                // 3: "ctrl + 1 + Delete"
+                if hotkey.key == None {
+                    if hotkey.parse_alpha_numeric(part) {
+                        println!("{}", "parse alpha true");
+                        continue;
+                    }
+                    if hotkey.parse_special(part) {
+                        continue;
+                    }
                 }
+                err = true;
+                break;
             }
-            // parse error
-            err = true;
+            //  finaryll hotkey must contains 1 key and minimum 1 modifier
+            err = err
+                || !(hotkey.alt || hotkey.ctrl || hotkey.shift || hotkey.win)
+                || hotkey.key == None;
             break;
         }
         if !err {
             Ok(hotkey)
         } else {
             Err(Error::default())
+        }
+    }
+
+    fn parse_modifier(&mut self, str: &str) -> bool {
+        match str.to_ascii_uppercase().as_str() {
+            "CTRL" => {
+                self.ctrl = true;
+                true
+            }
+            "ALT" => {
+                self.alt = true;
+                true
+            }
+            "SHIFT" => {
+                self.shift = true;
+                true
+            }
+            "WIN" => {
+                self.win = true;
+                true
+            }
+            _ => false,
+        }
+    }
+    fn parse_special(&mut self, str: &str) -> bool {
+        if let Some(special_key) = SpecialKey::from_str(str) {
+            self.key = Some(Key::special(special_key));
+            true
+        } else {
+            false
+        }
+    }
+    fn parse_alpha_numeric(&mut self, str: &str) -> bool {
+        if str.len() == 1 && str.is_ascii() {
+            self.key = Some(Key::AlphaNumeric(str.chars().nth(0).unwrap()));
+            true
+        } else {
+            false
         }
     }
 
@@ -137,28 +168,35 @@ mod tests {
         let new = Hotkey::new(false, false, false, false, None);
         let default = Hotkey::default();
         assert!(new == default);
-    }
-
-    #[test]
-    fn parse_1() {
         let new = Hotkey::new(true, false, false, false, Some(Key::AlphaNumeric('a')));
         let parse = Hotkey::parse("ctrl + a").unwrap();
-        println!("{:?}", new);
-        println!("{:?}", parse);
-        assert!(new == parse);
-    }
-    #[test]
-    fn parse_2() {
-        let new = Hotkey::new(true, false, false, false, Some(Key::AlphaNumeric('a')));
-        let parse = Hotkey::parse("ctrl + ctrl + a").unwrap();
-        println!("{:?}", new);
-        println!("{:?}", parse);
         assert!(new == parse);
     }
 
     #[test]
-    fn parse_3() {
-        let parse = Hotkey::parse("ctrl + ctrl + f1 + f2");
+    fn parse() {
+        let parse = Hotkey::parse("ctrl + shift + f1 + f2");
+        assert_eq!(parse, Err(Error::default()));
+
+        let parse = Hotkey::parse("ctrl + f1 + f2");
+        assert_eq!(parse, Err(Error::default()));
+
+        let parse = Hotkey::parse("ctrl + shift");
+        assert_eq!(parse, Err(Error::default()));
+
+        let parse = Hotkey::parse("a + a");
+        assert_eq!(parse, Err(Error::default()));
+
+        let parse = Hotkey::parse("a + delete");
+        assert_eq!(parse, Err(Error::default()));
+
+        let parse = Hotkey::parse("backspace + delete");
+        assert_eq!(parse, Err(Error::default()));
+
+        let parse = Hotkey::parse("ababa + xxx  ss + x");
+        assert_eq!(parse, Err(Error::default()));
+
+        let parse = Hotkey::parse(" ");
         assert_eq!(parse, Err(Error::default()));
     }
 }
