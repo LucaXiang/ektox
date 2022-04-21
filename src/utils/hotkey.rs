@@ -11,7 +11,7 @@ pub mod key;
 use self::special_key::SpecialKey;
 pub mod special_key;
 #[derive(Eq, Debug)]
-struct Hotkey {
+pub struct Hotkey {
     ctrl: bool,
     shift: bool,
     alt: bool,
@@ -120,6 +120,13 @@ impl Hotkey {
             modifiers |= MOD_WIN;
         }
         modifiers
+    }
+
+    pub fn get_key(&self) -> u32 {
+        match &self.key {
+            Some(key) => key.as_u32(),
+            None => 0,
+        }
     }
 }
 
