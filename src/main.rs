@@ -2,17 +2,16 @@ use std::{collections::HashMap, fs::File, io::BufReader};
 
 use ektox::{
     common::{App, Config},
-    utils::{EnumWindowParam, Hotkey, WindowFinder},
+    utils::{Hotkey, WindowFinder},
 };
 
 use windows::{
-    core::PCSTR,
     Win32::{
         Foundation::HWND,
         UI::{
             Input::KeyboardAndMouse::RegisterHotKey,
             WindowsAndMessaging::{
-                DispatchMessageW, GetMessageW, MessageBoxA, SetForegroundWindow, MB_OK, MSG,
+                DispatchMessageW, GetMessageW, SetForegroundWindow, MSG,
                 WM_HOTKEY,
             },
         },
