@@ -70,7 +70,6 @@ impl Hotkey {
                 // 3: "ctrl + 1 + Delete"
                 if hotkey.key == None {
                     if hotkey.parse_alpha_numeric(part) {
-                        println!("{}", "parse alpha true");
                         continue;
                     }
                     if hotkey.parse_special(part) {
