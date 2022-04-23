@@ -36,8 +36,8 @@ impl Hotkey {
     pub fn default() -> Self {
         Hotkey {
             ctrl: false,
-            shift: false,
             alt: false,
+            shift: false,
             win: false,
             key: None,
         }
@@ -81,7 +81,7 @@ impl Hotkey {
             }
             //  finaryll hotkey must contains 1 key and minimum 1 modifier
             err = err
-                || !(hotkey.alt || hotkey.ctrl || hotkey.shift || hotkey.win)
+                || !(hotkey.ctrl || hotkey.alt || hotkey.shift || hotkey.win)
                 || hotkey.key == None;
             break;
         }
@@ -98,12 +98,12 @@ impl Hotkey {
                 self.ctrl = true;
                 true
             }
-            "ALT" => {
-                self.alt = true;
-                true
-            }
             "SHIFT" => {
                 self.shift = true;
+                true
+            }
+            "ALT" => {
+                self.alt = true;
                 true
             }
             "WIN" => {
@@ -136,11 +136,11 @@ impl Hotkey {
         if self.alt {
             modifiers |= MOD_ALT;
         }
-        if self.ctrl {
-            modifiers |= MOD_CONTROL;
-        }
         if self.shift {
             modifiers |= MOD_SHIFT;
+        }
+        if self.ctrl {
+            modifiers |= MOD_CONTROL;
         }
         if self.win {
             modifiers |= MOD_WIN;
