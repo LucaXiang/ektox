@@ -227,10 +227,10 @@ mod tests {
     #[test]
     fn get_key() {
         let hotkey = Hotkey::parse("ctrl + a").unwrap();
-        assert_eq!(hotkey.get_key(), 97);
+        assert_eq!(hotkey.get_key(), 'a' as u32);
 
         let hotkey = Hotkey::parse("ctrl + 1").unwrap();
-        assert_eq!(hotkey.get_key(), 49);
+        assert_eq!(hotkey.get_key(), '1' as u32);
 
         let hotkey = Hotkey::parse("ctrl + alt + delete").unwrap();
         assert_eq!(hotkey.get_key(), VK_DELETE.0 as u32);
