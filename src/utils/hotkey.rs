@@ -160,6 +160,10 @@ impl Hotkey {
 mod tests {
     use std::fmt::Error;
 
+    use windows::Win32::UI::Input::KeyboardAndMouse::{MOD_ALT, MOD_CONTROL, VK_DELETE};
+
+    use crate::utils::hotkey::special_key::SpecialKey;
+
     use super::{Hotkey, Key};
 
     #[test]
@@ -167,8 +171,19 @@ mod tests {
         let new = Hotkey::new(false, false, false, false, None);
         let default = Hotkey::default();
         assert!(new == default);
+
         let new = Hotkey::new(true, false, false, false, Some(Key::AlphaNumeric('a')));
         let parse = Hotkey::parse("ctrl + a").unwrap();
+        assert!(new == parse);
+
+        let new = Hotkey::new(
+            true,
+            false,
+            true,
+            false,
+            Some(Key::special(SpecialKey::Delete)),
+        );
+        let parse = Hotkey::parse("ctrl + alt + delete").unwrap();
         assert!(new == parse);
     }
 
@@ -197,5 +212,27 @@ mod tests {
 
         let parse = Hotkey::parse(" ");
         assert_eq!(parse, Err(Error::default()));
+    }
+
+    #[test]
+    fn get_modifiers() {
+        let hotkey = Hotkey::parse("ctrl + a").unwrap();
+        assert!((hotkey.get_modifiers() & MOD_CONTROL) == MOD_CONTROL);
+
+        let hotkey = Hotkey::parse("ctrl + alt + a").unwrap();
+        assert!((hotkey.get_modifiers() & MOD_CONTROL) == MOD_CONTROL);
+        assert!((hotkey.get_modifiers() & MOD_ALT) == MOD_ALT);
+    }
+
+    #[test]
+    fn get_key() {
+        let hotkey = Hotkey::parse("ctrl + a").unwrap();
+        assert_eq!(hotkey.get_key(), 97);
+
+        let hotkey = Hotkey::parse("ctrl + 1").unwrap();
+        assert_eq!(hotkey.get_key(), 49);
+
+        let hotkey = Hotkey::parse("ctrl + alt + delete").unwrap();
+        assert_eq!(hotkey.get_key(), VK_DELETE.0 as u32);
     }
 }
