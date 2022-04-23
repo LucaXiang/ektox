@@ -45,10 +45,7 @@ impl Hotkey {
         }
     }
 
-    pub fn parse(keys: &str) -> Result<Self, ParseHotkeyError> {
-        let mut source = keys.to_string();
-        source.make_ascii_uppercase();
-        let source = source.as_str();
+    pub fn parse(source: &str) -> Result<Self, ParseHotkeyError> {
         let mut hotkey = Hotkey::default();
         let mut error = ParseHotkeyError::default();
         let mut parse_error = false;
@@ -61,7 +58,7 @@ impl Hotkey {
             // 3: ""
             if part_of_keys.len() < 2 {
                 parse_error = true;
-                error = ParseHotkeyError::new(keys, ParseHotkeyErrorKind::KeyNotEnough);
+                error = ParseHotkeyError::new(source, ParseHotkeyErrorKind::KeyNotEnough);
                 break;
             }
             for part in part_of_keys.into_iter() {
@@ -74,7 +71,7 @@ impl Hotkey {
                 // 3: "ctrl + 1 + Delete"
                 if hotkey.key != None {
                     parse_error = true;
-                    error = ParseHotkeyError::new(keys, ParseHotkeyErrorKind::TooManyKey);
+                    error = ParseHotkeyError::new(source, ParseHotkeyErrorKind::TooManyKey);
                     break;
                 }
                 if hotkey.parse_alpha_numeric(part) {
@@ -84,14 +81,14 @@ impl Hotkey {
                     continue;
                 }
                 parse_error = true;
-                error = ParseHotkeyError::new(keys, ParseHotkeyErrorKind::UnexpectedKey);
+                error = ParseHotkeyError::new(source, ParseHotkeyErrorKind::UnexpectedKey);
                 break;
             }
             //  finaryll hotkey must contains 1 key and minimum 1 modifier
             if !parse_error {
                 if hotkey.key == None {
                     parse_error = true;
-                    error = ParseHotkeyError::new(keys, ParseHotkeyErrorKind::MissingKey);
+                    error = ParseHotkeyError::new(source, ParseHotkeyErrorKind::MissingKey);
                 }
             }
             break;
