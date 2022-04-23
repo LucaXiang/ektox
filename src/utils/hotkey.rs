@@ -1,10 +1,12 @@
 use self::key::Key;
-use std::fmt::Error;
+use self::parse_hotkey_error::{ParseHotkeyError, ParseHotkeyErrorKind};
+use self::special_key::SpecialKey;
 use windows::Win32::UI::Input::KeyboardAndMouse::{
     HOT_KEY_MODIFIERS, MOD_ALT, MOD_CONTROL, MOD_SHIFT, MOD_WIN,
 };
+
 pub mod key;
-use self::special_key::SpecialKey;
+pub mod parse_hotkey_error;
 pub mod special_key;
 #[derive(Eq, Debug)]
 pub struct Hotkey {
@@ -43,13 +45,14 @@ impl Hotkey {
         }
     }
 
-    pub fn parse(keys: &str) -> Result<Self, Error> {
+    pub fn parse(keys: &str) -> Result<Self, ParseHotkeyError> {
+        let mut source = keys.to_string();
+        source.make_ascii_uppercase();
+        let source = source.as_str();
         let mut hotkey = Hotkey::default();
-        let mut err = false;
-        let mut part_of_keys: Vec<&str> = keys.split('+').map(|part| part.trim()).collect();
-        // remove duplicate key
-        // case ctrl + shift + ctrl + a
-        part_of_keys.dedup();
+        let mut error = ParseHotkeyError::default();
+        let mut parse_error = false;
+        let part_of_keys: Vec<&str> = source.split('+').map(|part| part.trim()).collect();
         loop {
             // if part_of_keys is empty or just one
             // like:
@@ -57,7 +60,8 @@ impl Hotkey {
             // 2: "a"
             // 3: ""
             if part_of_keys.len() < 2 {
-                err = true;
+                parse_error = true;
+                error = ParseHotkeyError::new(keys, ParseHotkeyErrorKind::KeyNotEnough);
                 break;
             }
             for part in part_of_keys.into_iter() {
@@ -68,27 +72,34 @@ impl Hotkey {
                 // 1: "ctrl + 1 + 2"
                 // 2: "ctrl + Delete + BackSpace"
                 // 3: "ctrl + 1 + Delete"
-                if hotkey.key == None {
-                    if hotkey.parse_alpha_numeric(part) {
-                        continue;
-                    }
-                    if hotkey.parse_special(part) {
-                        continue;
-                    }
+                if hotkey.key != None {
+                    parse_error = true;
+                    error = ParseHotkeyError::new(keys, ParseHotkeyErrorKind::TooManyKey);
+                    break;
                 }
-                err = true;
+                if hotkey.parse_alpha_numeric(part) {
+                    continue;
+                }
+                if hotkey.parse_special(part) {
+                    continue;
+                }
+                parse_error = true;
+                error = ParseHotkeyError::new(keys, ParseHotkeyErrorKind::UnexpectedKey);
                 break;
             }
             //  finaryll hotkey must contains 1 key and minimum 1 modifier
-            err = err
-                || !(hotkey.ctrl || hotkey.alt || hotkey.shift || hotkey.win)
-                || hotkey.key == None;
+            if !parse_error {
+                if hotkey.key == None {
+                    parse_error = true;
+                    error = ParseHotkeyError::new(keys, ParseHotkeyErrorKind::MissingKey);
+                }
+            }
             break;
         }
-        if !err {
+        if !parse_error {
             Ok(hotkey)
         } else {
-            Err(Error::default())
+            Err(error)
         }
     }
 
@@ -158,11 +169,13 @@ impl Hotkey {
 
 #[cfg(test)]
 mod tests {
-    use std::fmt::Error;
 
     use windows::Win32::UI::Input::KeyboardAndMouse::{MOD_ALT, MOD_CONTROL, VK_DELETE};
 
-    use crate::utils::hotkey::special_key::SpecialKey;
+    use crate::utils::hotkey::{
+        parse_hotkey_error::{ParseHotkeyError, ParseHotkeyErrorKind},
+        special_key::SpecialKey,
+    };
 
     use super::{Hotkey, Key};
 
@@ -189,29 +202,35 @@ mod tests {
 
     #[test]
     fn parse() {
-        let parse = Hotkey::parse("ctrl + shift + f1 + f2");
-        assert_eq!(parse, Err(Error::default()));
+        let source = "ctrl + shift + f1 + f2";
+        let actual = Hotkey::parse(source);
+        let expected = ParseHotkeyError::new(source, ParseHotkeyErrorKind::TooManyKey);
+        assert_eq!(actual, Err(expected));
 
-        let parse = Hotkey::parse("ctrl + f1 + f2");
-        assert_eq!(parse, Err(Error::default()));
+        let source = "ctrl + a + f2";
+        let actual = Hotkey::parse(source);
+        let expected = ParseHotkeyError::new(source, ParseHotkeyErrorKind::TooManyKey);
+        assert_eq!(actual, Err(expected));
 
-        let parse = Hotkey::parse("ctrl + shift");
-        assert_eq!(parse, Err(Error::default()));
+        let source = "a + a";
+        let actual = Hotkey::parse(source);
+        let expected = ParseHotkeyError::new(source, ParseHotkeyErrorKind::TooManyKey);
+        assert_eq!(actual, Err(expected));
 
-        let parse = Hotkey::parse("a + a");
-        assert_eq!(parse, Err(Error::default()));
+        let source = "ctrl + shift";
+        let actual = Hotkey::parse(source);
+        let expected = ParseHotkeyError::new(source, ParseHotkeyErrorKind::MissingKey);
+        assert_eq!(actual, Err(expected));
 
-        let parse = Hotkey::parse("a + delete");
-        assert_eq!(parse, Err(Error::default()));
+        let source = "ctrl + ";
+        let actual = Hotkey::parse(source);
+        let expected = ParseHotkeyError::new(source, ParseHotkeyErrorKind::UnexpectedKey);
+        assert_eq!(actual, Err(expected));
 
-        let parse = Hotkey::parse("backspace + delete");
-        assert_eq!(parse, Err(Error::default()));
-
-        let parse = Hotkey::parse("ababa + xxx  ss + x");
-        assert_eq!(parse, Err(Error::default()));
-
-        let parse = Hotkey::parse(" ");
-        assert_eq!(parse, Err(Error::default()));
+        let source = "";
+        let actual = Hotkey::parse(source);
+        let expected = ParseHotkeyError::new(source, ParseHotkeyErrorKind::KeyNotEnough);
+        assert_eq!(actual, Err(expected));
     }
 
     #[test]
