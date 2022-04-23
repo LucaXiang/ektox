@@ -5,8 +5,9 @@ use windows::Win32::{
         Threading::{OpenProcess, PROCESS_QUERY_LIMITED_INFORMATION},
     },
     UI::WindowsAndMessaging::{
-        EnumWindows, GetWindowLongW, GetWindowTextLengthW, GetWindowTextW,
-        GetWindowThreadProcessId, GWL_STYLE, WS_POPUP, WS_VISIBLE,
+        EnumWindows, GetWindow, GetWindowInfo, GetWindowLongW, GetWindowTextLengthW,
+        GetWindowTextW, GetWindowThreadProcessId, GWL_EXSTYLE, GWL_STYLE, GW_OWNER, WINDOWINFO,
+        WS_EX_TOOLWINDOW, WS_POPUP, WS_VISIBLE,
     },
 };
 
@@ -70,6 +71,19 @@ impl WindowFinder {
         unsafe { GetWindowLongW(hwnd, GWL_STYLE) as u32 }
     }
 
+    pub fn get_window_extend_style(hwnd: HWND) -> u32 {
+        unsafe { GetWindowLongW(hwnd, GWL_EXSTYLE) as u32 }
+    }
+
+    pub fn get_window_info(hwnd: HWND) -> WINDOWINFO {
+        let mut window_info = WINDOWINFO::default();
+        window_info.cbSize = std::mem::size_of::<WINDOWINFO>() as u32;
+        unsafe {
+            GetWindowInfo(hwnd, &mut window_info);
+        }
+        window_info
+    }
+
     pub fn get_process_id_from_hwnd(hwnd: HWND) -> u32 {
         let mut pid: u32 = 0;
         unsafe {
@@ -93,23 +107,48 @@ impl WindowFinder {
         }
     }
 
-    pub fn get_frontent_window() -> Vec<HWND> {
+    pub fn get_process_name_from_hwnd(hwnd: HWND) -> String {
+        let pid = Self::get_process_id_from_hwnd(hwnd);
+        Self::get_process_name_from_pid(pid)
+    }
+
+    pub fn get_frontend_window() -> Vec<HWND> {
         let mut param = EnumWindowParam::new(|_ewp, hwnd| {
             let mut result = false;
             #[allow(clippy::never_loop)]
             loop {
                 unsafe {
+                    // window must have owner
+                    if GetWindow(hwnd, GW_OWNER) != HWND(0) {
+                        break;
+                    }
+
+                    // window title is not empty
                     if GetWindowTextLengthW(hwnd) == 0 {
                         break;
                     }
                 }
-                let window_style = WindowFinder::get_window_style(hwnd);
+
+                let window_info = Self::get_window_info(hwnd);
+
+                let window_style = window_info.dwStyle;
+
+                // window is not pop-up window.
                 if window_style & WS_POPUP.0 != 0 {
                     break;
                 }
+                // window should to be visible
                 if window_style & WS_VISIBLE.0 == 0 {
                     break;
                 }
+
+                let window_extend_style = window_info.dwExStyle;
+
+                // window is not floating window
+                if window_extend_style & WS_EX_TOOLWINDOW.0 != 0 {
+                    break;
+                }
+
                 result = true;
                 break;
             }
@@ -117,5 +156,24 @@ impl WindowFinder {
         });
         WindowFinder::enum_window(&mut param);
         param.window_handles
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::WindowFinder;
+
+    #[test]
+    #[ignore]
+    fn get_frontend_window() {
+        let r = WindowFinder::get_frontend_window();
+        for window in r.into_iter() {
+            eprintln!("HANDLE: {:x}", window.0);
+            eprintln!("->TITLE: {:#?}", WindowFinder::get_window_title(window));
+            eprintln!(
+                "--> FILENAME:{:#?}\n",
+                WindowFinder::get_process_name_from_hwnd(window)
+            );
+        }
     }
 }
