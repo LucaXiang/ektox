@@ -217,11 +217,11 @@ mod tests {
     #[test]
     fn get_modifiers() {
         let hotkey = Hotkey::parse("ctrl + a").unwrap();
-        assert!((hotkey.get_modifiers() & MOD_CONTROL) == MOD_CONTROL);
+        assert_eq!((hotkey.get_modifiers() & MOD_CONTROL), MOD_CONTROL);
 
         let hotkey = Hotkey::parse("ctrl + alt + a").unwrap();
-        assert!((hotkey.get_modifiers() & MOD_CONTROL) == MOD_CONTROL);
-        assert!((hotkey.get_modifiers() & MOD_ALT) == MOD_ALT);
+        assert_eq!((hotkey.get_modifiers() & MOD_CONTROL), MOD_CONTROL);
+        assert_eq!((hotkey.get_modifiers() & MOD_ALT), MOD_ALT);
     }
 
     #[test]
