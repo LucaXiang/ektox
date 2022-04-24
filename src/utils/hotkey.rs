@@ -1,9 +1,10 @@
 use std::fmt::Display;
-use std::ptr::NonNull;
 
 use self::key::Key;
 use self::parse_hotkey_error::{ParseHotkeyError, ParseHotkeyErrorKind};
 use self::special_key::SpecialKey;
+use serde::de::Visitor;
+use serde_json::value::Serializer;
 use windows::Win32::UI::Input::KeyboardAndMouse::{
     HOT_KEY_MODIFIERS, MOD_ALT, MOD_CONTROL, MOD_SHIFT, MOD_WIN,
 };
@@ -189,6 +190,42 @@ impl Display for Hotkey {
             str.push('?');
         }
         write!(f, "{}", str)
+    }
+}
+
+impl serde::Serialize for Hotkey {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        serializer.serialize_str(self.to_string().as_str())
+    }
+}
+
+impl<'de> serde::Deserialize<'de> for Hotkey {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        struct HotkeyVisitor;
+        impl<'de> Visitor<'de> for HotkeyVisitor {
+            type Value = Hotkey;
+
+            fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+                formatter.write_str("expect string")
+            }
+
+            fn visit_str<E>(self, v: &str) -> Result<Self::Value, E>
+            where
+                E: serde::de::Error,
+            {
+                match Hotkey::parse(v) {
+                    Ok(hotkey) => Ok(hotkey),
+                    Err(err) => Err(serde::de::Error::custom(err.to_string())),
+                }
+            }
+        }
+        deserializer.deserialize_str(HotkeyVisitor)
     }
 }
 
