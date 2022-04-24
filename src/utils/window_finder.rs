@@ -5,9 +5,9 @@ use windows::Win32::{
         Threading::{OpenProcess, PROCESS_QUERY_LIMITED_INFORMATION},
     },
     UI::WindowsAndMessaging::{
-        EnumWindows, GetWindow, GetWindowInfo, GetWindowLongW, GetWindowTextLengthW,
-        GetWindowTextW, GetWindowThreadProcessId, GWL_EXSTYLE, GWL_STYLE, GW_OWNER, WINDOWINFO,
-        WS_EX_TOOLWINDOW, WS_POPUP, WS_VISIBLE,
+        EnumWindows, GetForegroundWindow, GetWindow, GetWindowInfo, GetWindowLongW,
+        GetWindowTextLengthW, GetWindowTextW, GetWindowThreadProcessId, GWL_EXSTYLE, GWL_STYLE,
+        GW_OWNER, WINDOWINFO, WS_EX_TOOLWINDOW, WS_POPUP, WS_VISIBLE,
     },
 };
 
@@ -112,6 +112,10 @@ impl WindowFinder {
         Self::get_process_name_from_pid(pid)
     }
 
+    pub fn get_foreground_window() -> HWND {
+        unsafe { GetForegroundWindow() }
+    }
+
     pub fn get_frontend_window() -> Vec<HWND> {
         let mut param = EnumWindowParam::new(|_ewp, hwnd| {
             let mut result = false;
@@ -173,7 +177,6 @@ mod tests {
     use super::WindowFinder;
 
     #[test]
-    #[ignore]
     fn get_frontend_window() {
         let r = WindowFinder::get_frontend_window();
         for window in r.into_iter() {
