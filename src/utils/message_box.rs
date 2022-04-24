@@ -31,7 +31,7 @@ impl MessageBox {
         Self::msg(msg, "Info", MB_OK);
     }
 
-    pub fn erro(msg: &str) {
+    pub fn error(msg: &str) {
         Self::msg(msg, "Error", MB_OK);
     }
 }
