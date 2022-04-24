@@ -89,11 +89,9 @@ impl Hotkey {
                 break;
             }
             //  finaryll hotkey must contains 1 key and minimum 1 modifier
-            if !parse_error {
-                if hotkey.key == None {
-                    parse_error = true;
-                    error = ParseHotkeyError::new(source, ParseHotkeyErrorKind::MissingKey);
-                }
+            if !parse_error && hotkey.key == None {
+                parse_error = true;
+                error = ParseHotkeyError::new(source, ParseHotkeyErrorKind::MissingKey);
             }
             break;
         }
@@ -135,7 +133,7 @@ impl Hotkey {
     }
     fn parse_alpha_numeric(&mut self, str: &str) -> bool {
         if str.len() == 1 && str.is_ascii() {
-            self.key = Some(Key::AlphaNumeric(str.chars().nth(0).unwrap()));
+            self.key = Some(Key::AlphaNumeric(str.chars().next().unwrap()));
             true
         } else {
             false
