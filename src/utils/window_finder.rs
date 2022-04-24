@@ -177,6 +177,7 @@ mod tests {
     use super::WindowFinder;
 
     #[test]
+    #[ignore]
     fn get_frontend_window() {
         let r = WindowFinder::get_frontend_window();
         for window in r.into_iter() {
