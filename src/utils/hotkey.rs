@@ -4,7 +4,6 @@ use self::key::Key;
 use self::parse_hotkey_error::{ParseHotkeyError, ParseHotkeyErrorKind};
 use self::special_key::SpecialKey;
 use serde::de::Visitor;
-use serde_json::value::Serializer;
 use windows::Win32::UI::Input::KeyboardAndMouse::{
     HOT_KEY_MODIFIERS, MOD_ALT, MOD_CONTROL, MOD_SHIFT, MOD_WIN,
 };
