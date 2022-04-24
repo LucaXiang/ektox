@@ -149,6 +149,15 @@ impl WindowFinder {
                     break;
                 }
 
+                let window_rect = window_info.rcWindow;
+
+                // window area must great a 4px
+                if window_rect.right - window_rect.left <= 1
+                    || window_rect.bottom - window_rect.top <= 1
+                {
+                    break;
+                }
+
                 result = true;
                 break;
             }
