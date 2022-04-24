@@ -2,7 +2,9 @@ use windows::{
     core::PCSTR,
     Win32::{
         Foundation::HWND,
-        UI::WindowsAndMessaging::{MessageBoxA, MB_OK, MESSAGEBOX_RESULT, MESSAGEBOX_STYLE},
+        UI::WindowsAndMessaging::{
+            MessageBoxA, MB_ICONERROR, MB_OK, MESSAGEBOX_RESULT, MESSAGEBOX_STYLE,
+        },
     },
 };
 
@@ -28,7 +30,7 @@ impl MessageBox {
     }
 
     pub fn info(msg: &str) {
-        Self::msg(msg, "Info", MB_OK);
+        Self::msg(msg, "Info", MB_ICONERROR);
     }
 
     pub fn error(msg: &str) {
