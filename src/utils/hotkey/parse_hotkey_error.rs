@@ -47,7 +47,7 @@ impl Display for ParseHotkeyError {
         };
         write!(
             f,
-            "ParseHotkeyError: '{}' from source \"{}\"",
+            "ParseHotkeyError: '{}' from source '{}'",
             message, self.source
         )
     }
