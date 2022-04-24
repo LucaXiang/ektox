@@ -1,3 +1,6 @@
+use std::fmt::Display;
+use std::ptr::NonNull;
+
 use self::key::Key;
 use self::parse_hotkey_error::{ParseHotkeyError, ParseHotkeyErrorKind};
 use self::special_key::SpecialKey;
@@ -165,6 +168,30 @@ impl Hotkey {
     }
 }
 
+impl Display for Hotkey {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut str = String::default();
+        if self.ctrl {
+            str.push_str("Ctrl+");
+        }
+        if self.shift {
+            str.push_str("Shift+");
+        }
+        if self.alt {
+            str.push_str("Alt+");
+        }
+        if self.win {
+            str.push_str("Win+");
+        }
+        if let Some(key) = &self.key {
+            str.push_str(key.to_string().as_str());
+        } else {
+            str.push('?');
+        }
+        write!(f, "{}", str)
+    }
+}
+
 #[cfg(test)]
 mod tests {
 
@@ -251,5 +278,11 @@ mod tests {
 
         let hotkey = Hotkey::parse("ctrl + alt + delete").unwrap();
         assert_eq!(hotkey.get_key(), VK_DELETE.0 as u32);
+    }
+
+    #[test]
+    fn to_string() {
+        let hotkey = Hotkey::parse("ctrl + alt + delete").unwrap();
+        assert_eq!(hotkey.to_string(), "Ctrl+Alt+Delete");
     }
 }

@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use super::SpecialKey;
 #[derive(Eq, Debug)]
 pub enum Key {
@@ -30,6 +32,16 @@ impl Key {
             Key::AlphaNumeric(c) => *c as u32,
             Key::Special(k) => k.as_u32(),
         }
+    }
+}
+
+impl Display for Key {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let str = match &self {
+            Key::AlphaNumeric(c) => String::from(c.to_string()),
+            Key::Special(s) => s.to_string(),
+        };
+        write!(f, "{}", str)
     }
 }
 

@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use windows::Win32::UI::Input::KeyboardAndMouse::*;
 #[derive(Eq, Clone, Copy, Debug)]
 #[allow(unused)]
@@ -92,6 +94,12 @@ impl PartialEq for SpecialKey {
     }
 }
 
+impl Display for SpecialKey {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{:?}", self)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::SpecialKey;
@@ -101,5 +109,12 @@ mod tests {
         let a = SpecialKey::from_str("F1").unwrap();
         let b = SpecialKey::F1;
         assert!(a == b);
+    }
+
+    #[test]
+    fn enum_to_str() {
+        let key = "F1";
+        let special_key = SpecialKey::from_str(key).unwrap();
+        assert_eq!(key, special_key.to_string());
     }
 }
