@@ -8,6 +8,7 @@ use windows::Win32::UI::Input::KeyboardAndMouse::{
 pub mod key;
 pub mod parse_hotkey_error;
 pub mod special_key;
+
 #[derive(Eq, Debug)]
 pub struct Hotkey {
     ctrl: bool,

@@ -64,19 +64,16 @@ impl PartialEq for Version {
 impl PartialOrd for Version {
     fn partial_cmp(&self, other: &Version) -> Option<std::cmp::Ordering> {
         let mut result = std::cmp::Ordering::Equal;
-        loop{
-            if self.major != other.major
-            {
+        loop {
+            if self.major != other.major {
                 result = self.major.cmp(&other.major);
                 break;
             }
-            if self.minor != other.minor
-            {
+            if self.minor != other.minor {
                 result = self.minor.cmp(&other.minor);
                 break;
             }
-            if self.patch != other.patch
-            {
+            if self.patch != other.patch {
                 result = self.patch.cmp(&other.patch);
                 break;
             }
