@@ -28,7 +28,7 @@ mod tests {
                 "exec": "C:/ProgramFile/test.exe"
               },
               {
-                "hotkey": "ctrl + 2 + 1",
+                "hotkey": "ctrl + 2",
                 "exec": "C:/ProgramFile/test.exe"
               }
             ]
