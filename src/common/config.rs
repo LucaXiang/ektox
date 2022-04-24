@@ -1,5 +1,7 @@
 use serde::{Deserialize, Serialize};
 
+use crate::utils::Hotkey;
+
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Config {
     pub startup: bool,
@@ -7,11 +9,9 @@ pub struct Config {
 }
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Action {
-    pub hotkey: String,
+    pub hotkey: Hotkey,
     pub exec: String,
 }
-
-impl Config {}
 
 #[cfg(test)]
 mod tests {
@@ -28,7 +28,7 @@ mod tests {
                 "exec": "C:/ProgramFile/test.exe"
               },
               {
-                "hotkey": "ctrl + 2",
+                "hotkey": "ctrl + 2 + 1",
                 "exec": "C:/ProgramFile/test.exe"
               }
             ]
