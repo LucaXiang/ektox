@@ -36,4 +36,26 @@ mod tests {
         let config: Config = serde_json::from_str(data).unwrap();
         println!("result = {:#?}", config);
     }
+    #[test]
+
+    fn error() {
+        let data = r#"
+        {
+            "startup": true,
+            "actions": [
+              {
+                "hotkey": "ctrl + 1 + delete",
+                "exec": "C:/ProgramFile/test.exe"
+              },
+              {
+                "hotkey": "ctrl + 2",
+                "exec": "C:/ProgramFile/test.exe"
+              }
+            ]
+        }"#;
+        let parse_result = serde_json::from_str::<Config>(data);
+        if let Ok(_) = parse_result {
+            panic!("should return error");
+        }
+    }
 }
