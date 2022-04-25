@@ -1,6 +1,12 @@
-use ektox::common::App;
+use ektox::{common::App, utils::MessageBox};
 
 fn main() {
-    let app = App::new();
-    println!("{}", app.get_version());
+    match App::init() {
+        Ok(app) => {
+            println!("{}", app.get_version());
+        }
+        Err(error) => {
+            MessageBox::error(error.to_string().as_str());
+        }
+    }
 }
