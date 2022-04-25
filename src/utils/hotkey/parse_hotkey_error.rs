@@ -38,13 +38,7 @@ impl ParseHotkeyError {
 }
 impl Display for ParseHotkeyError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let message = match self.kind {
-            ParseHotkeyErrorKind::KeyNotEnough => "KeyNotEnough",
-            ParseHotkeyErrorKind::TooManyKey => "TooManyKey",
-            ParseHotkeyErrorKind::MissingKey => "MissingKey",
-            ParseHotkeyErrorKind::Unknow => "Unexpected",
-            ParseHotkeyErrorKind::UnexpectedKey => "UnexpectedKey",
-        };
+        let message = format!("{:#?}", self.kind);
         write!(
             f,
             "ParseHotkeyError: '{}' from source '{}'",
