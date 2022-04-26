@@ -1,5 +1,10 @@
 use std::fs::File;
 
+use windows::Win32::{
+    Foundation::HWND,
+    UI::WindowsAndMessaging::{GetMessageW, MSG, WM_HOTKEY, WM_QUIT},
+};
+
 use super::{AppError, Config, Version};
 
 pub struct App {
@@ -12,6 +17,31 @@ impl App {
         let config = Self::load_configure()?;
 
         return Ok(App { version, config });
+    }
+
+    pub fn start(&self) {
+        self.handle_window_event()
+    }
+
+    fn handle_window_event(&self) {
+        let mut msg: MSG = MSG::default();
+        unsafe {
+            while GetMessageW(&mut msg, HWND::default(), 0, 0).into() {
+                match msg.message {
+                    WM_HOTKEY => {
+                        let id: usize = msg.wParam.0;
+                        self.process(id);
+                    }
+                    WM_QUIT => {
+                        break;
+                    }
+                    _ => {}
+                }
+            }
+        }
+    }
+    fn process(&self, id: usize) {
+        todo!()
     }
 
     fn load_configure() -> Result<Config, AppError> {
