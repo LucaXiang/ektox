@@ -24,7 +24,7 @@ impl App {
                 let msg = match io_error.kind() {
                     std::io::ErrorKind::NotFound => "Configure File Not Found",
                     std::io::ErrorKind::PermissionDenied => " Open Configure File Permision Denied",
-                    _ => todo!(),
+                    _ => "Unexpected error",
                 };
                 Err(AppError::new(msg.to_string()))
             }
