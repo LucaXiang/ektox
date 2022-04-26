@@ -7,6 +7,12 @@ pub struct Config {
     pub startup: bool,
     pub actions: Vec<Action>,
 }
+
+impl Config {
+    pub fn get_actions(&self) -> &Vec<Action> {
+        &self.actions
+    }
+}
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Action {
     pub hotkey: Hotkey,

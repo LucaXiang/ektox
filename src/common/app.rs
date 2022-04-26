@@ -2,7 +2,10 @@ use std::fs::File;
 
 use windows::Win32::{
     Foundation::HWND,
-    UI::WindowsAndMessaging::{GetMessageW, MSG, WM_HOTKEY, WM_QUIT},
+    UI::{
+        Input::KeyboardAndMouse::RegisterHotKey,
+        WindowsAndMessaging::{GetMessageW, MSG, WM_HOTKEY, WM_QUIT},
+    },
 };
 
 use super::{AppError, Config, Version};
@@ -15,12 +18,30 @@ impl App {
     pub fn init() -> Result<Self, AppError> {
         let version = Version::from_cargo_package();
         let config = Self::load_configure()?;
+        let app = App { version, config };
 
-        return Ok(App { version, config });
+        return Ok(app);
     }
 
     pub fn start(&self) {
+        self.register_hotkeys();
         self.handle_window_event()
+    }
+
+    pub fn register_hotkeys(&self) {
+        unsafe {
+            let mut index = 1;
+            for action in self.config.get_actions() {
+                let hotkey = &action.hotkey;
+                RegisterHotKey(
+                    HWND::default(),
+                    index,
+                    hotkey.get_modifiers(),
+                    hotkey.get_key(),
+                );
+                index += 1;
+            }
+        }
     }
 
     fn handle_window_event(&self) {
@@ -41,7 +62,11 @@ impl App {
         }
     }
     fn process(&self, id: usize) {
-        todo!()
+        println!(
+            "id: {} exec: {}",
+            id,
+            self.config.get_actions()[id - 1].exec
+        );
     }
 
     fn load_configure() -> Result<Config, AppError> {
