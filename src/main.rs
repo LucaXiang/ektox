@@ -1,9 +1,9 @@
+#![windows_subsystem = "windows"]
 use ektox::{common::App, utils::MessageBox};
 
 fn main() {
     match App::init() {
         Ok(app) => {
-            println!("{}", app.get_version());
             app.start();
         }
         Err(error) => {

@@ -103,7 +103,7 @@ impl WindowFinder {
                 len = K32GetModuleFileNameExW(handle, HINSTANCE(0), &mut BUFFER) as usize;
                 CloseHandle(handle);
             }
-            String::from_utf16_lossy(&BUFFER[0..len])
+            String::from_utf16_lossy(&BUFFER[0..len]).replace("\\", "/")
         }
     }
 

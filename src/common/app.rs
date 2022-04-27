@@ -4,9 +4,14 @@ use windows::Win32::{
     Foundation::HWND,
     UI::{
         Input::KeyboardAndMouse::RegisterHotKey,
-        WindowsAndMessaging::{GetMessageW, MSG, WM_HOTKEY, WM_QUIT},
+        WindowsAndMessaging::{
+            GetMessageW, SetForegroundWindow, ShowWindow, MSG, SW_NORMAL, SW_RESTORE, WM_HOTKEY,
+            WM_QUIT, WS_MINIMIZE,
+        },
     },
 };
+
+use crate::utils::WindowFinder;
 
 use super::{AppError, Config, Version};
 
@@ -30,7 +35,7 @@ impl App {
 
     pub fn register_hotkeys(&self) {
         unsafe {
-            let mut index = 1;
+            let mut index = 0;
             for action in self.config.get_actions() {
                 let hotkey = &action.hotkey;
                 RegisterHotKey(
@@ -62,11 +67,20 @@ impl App {
         }
     }
     fn process(&self, id: usize) {
-        println!(
-            "id: {} exec: {}",
-            id,
-            self.config.get_actions()[id - 1].exec
-        );
+        let key = self.config.get_actions()[id].exec.to_owned();
+        let target_window: Vec<HWND> = WindowFinder::get_frontend_window()
+            .into_iter()
+            .filter(|hwnd| WindowFinder::get_process_name_from_hwnd(*hwnd) == key)
+            .collect();
+        if target_window.len() > 0 {
+            unsafe {
+                let window = target_window[0];
+                if WindowFinder::get_window_style(window) & WS_MINIMIZE.0 != 0 {
+                    ShowWindow(window, SW_NORMAL);
+                }
+                SetForegroundWindow(window);
+            }
+        }
     }
 
     fn load_configure() -> Result<Config, AppError> {
